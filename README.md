@@ -43,7 +43,8 @@ To get started with the project, follow these steps:
 
 5. **Run the development server:**
    ```bash
-   pnpm run dev
+   pnpm build
+   pnpm start
    ```
 
 6. **Open your browser and navigate to:**

@@ -108,7 +108,7 @@ export default function RegisterForm() {
 
         {message && (
           <div className={`p-4 rounded ${
-            message.includes('sucesso') 
+            message.includes('successfully') 
               ? 'bg-green-900/50 border border-green-500 text-green-400' 
               : 'bg-red-900/50 border border-red-500 text-red-400'
           }`}>

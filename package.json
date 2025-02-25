@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx scripts/check-db.ts && next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "tsx scripts/check-db.ts && next start",
+    "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {

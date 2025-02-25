@@ -1,8 +1,9 @@
 import Header from '@/components/layout/Header'
-import { prisma } from '@/lib/prisma'
+import { getCharacterWithDetails, getAccountCharacters } from '@/services/characters'
 import { getVocationName, getVocationAssets } from '@/utils/game'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface PageProps {
   params: Promise<{
@@ -11,45 +12,16 @@ interface PageProps {
 }
 
 export default async function CharacterPage({ params }: PageProps) {
-  // Resolve and decode the character name from URL
   const resolvedParams = await params
   const characterName = decodeURIComponent(resolvedParams.name)
 
-  const character = await prisma.players.findUnique({
-    where: { 
-      name: characterName 
-    },
-    select: {
-      id: true,
-      name: true,
-      level: true,
-      vocation: true,
-      sex: true,
-      health: true,
-      healthmax: true,
-      mana: true,
-      manamax: true,
-      experience: true,
-      skill_fist: true,
-      skill_club: true,
-      skill_sword: true,
-      skill_axe: true,
-      skill_dist: true,
-      skill_shielding: true,
-      skill_fishing: true,
-      maglevel: true,
-      lastlogin: true,
-      accounts: {
-        select: {
-          creation: true
-        }
-      }
-    }
-  })
+  const character = await getCharacterWithDetails(characterName)
 
   if (!character) {
     notFound()
   }
+
+  const accountCharacters = await getAccountCharacters(character.account_id, characterName)
 
   return (
     <main className="min-h-screen bg-tibia-darker bg-[url('/images/bg-pattern.png')] bg-repeat">
@@ -59,32 +31,54 @@ export default async function CharacterPage({ params }: PageProps) {
         {/* Hero Section */}
         <div className="relative mb-8 bg-tibia-dark rounded-lg border border-tibia-accent overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-tibia-dark via-transparent to-transparent z-10" />
-          <div className="relative z-20 p-8 flex items-center gap-6">
-            <div className="w-24 h-24 bg-tibia-darker rounded-lg border-2 border-yellow-400 flex items-center justify-center overflow-hidden shadow-lg transform hover:scale-105 transition-transform">
-              <Image
-                src={getVocationAssets(character.vocation).gif}
-                alt={getVocationName(character.vocation)}
-                width={80}
-                height={80}
-                className="pixelated"
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-yellow-400 mb-2 tracking-wide">
-                {character.name}
-              </h1>
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 bg-green-600 text-white rounded-full text-sm font-semibold">
-                  Level {character.level}
-                </span>
-                <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold">
-                  {getVocationName(character.vocation)}
-                </span>
-                <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold">
-                  {character.sex === 1 ? 'Male' : 'Female'}
-                </span>
+          <div className="relative z-20 p-8 flex items-center justify-between">
+            {/* Left side with character info */}
+            <div className="flex items-center gap-6">
+              <div className="w-24 h-24 bg-tibia-darker rounded-lg border-2 border-yellow-400 flex items-center justify-center overflow-hidden shadow-lg">
+                <Image
+                  src={getVocationAssets(character.vocation).gif}
+                  alt={getVocationName(character.vocation)}
+                  width={80}
+                  height={80}
+                  className="pixelated"
+                />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-yellow-400 mb-2 tracking-wide">
+                  {character.name}
+                </h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="px-3 py-1 bg-green-600 text-white rounded-full text-sm font-semibold">
+                    Level {character.level}
+                  </span>
+                  <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-semibold">
+                    {getVocationName(character.vocation)}
+                  </span>
+                  <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold">
+                    {character.sex === 1 ? 'Male' : 'Female'}
+                  </span>
+                </div>
               </div>
             </div>
+
+            {/* Right side with guild info */}
+            {character.guild_membership && (
+              <div className="flex items-center gap-4 border-l border-tibia-accent pl-6">
+                <div className="text-right">
+                  <div className="text-yellow-400 font-semibold">
+                    {character.guild_membership.guilds.name}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    {character.guild_membership.guild_ranks.name}
+                  </div>
+                  {character.guild_membership.nick && (
+                    <div className="text-sm text-gray-500 italic">
+                      "{character.guild_membership.nick}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -143,6 +137,40 @@ export default async function CharacterPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+
+            {/* Add Other Characters Section */}
+            {accountCharacters.length > 0 && (
+              <div className="bg-tibia-dark rounded-lg border border-tibia-accent overflow-hidden">
+                <div className="bg-gradient-to-r from-yellow-600/20 to-transparent px-6 py-4 border-b border-tibia-accent">
+                  <h2 className="text-xl font-bold text-yellow-400">Other Characters</h2>
+                </div>
+                <div className="p-4">
+                  <div className="space-y-2">
+                    {accountCharacters.map((char) => (
+                      <Link
+                        key={char.name}
+                        href={`/characters/${encodeURIComponent(char.name)}`}
+                        className="flex items-center justify-between p-3 bg-tibia-darker rounded-lg hover:bg-tibia-darker/70 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 flex items-center justify-center">
+                            <Image
+                              src={getVocationAssets(char.vocation).gif}
+                              alt={getVocationName(char.vocation)}
+                              width={24}
+                              height={24}
+                              className="pixelated"
+                            />
+                          </div>
+                          <span className="text-white">{char.name}</span>
+                        </div>
+                        <span className="text-sm text-gray-400">Level {char.level}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Skills Section */}

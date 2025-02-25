@@ -4,41 +4,35 @@ import CommunityDropdown from '../ui/CommunityDropdown'
 
 export default function Header() {
   return (
-    <header className="bg-tibia-dark p-4 rounded-lg shadow-lg mb-8 border border-tibia-accent">
+    <header className="bg-tibia-dark p-2 sm:p-4 rounded-lg shadow-lg mb-8 border border-tibia-accent">
       <div className="container mx-auto">
-        {/* Logo and Title */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
-          </div>
-        </div>
-
         {/* Navigation */}
-        <nav className="flex items-center">
-          <div className="flex gap-6">
+        <nav className="flex items-center justify-center sm:justify-start">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 px-2">
             <Link 
               href="/" 
-              className="text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
+              className="text-sm sm:text-base text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
             >
               <span className="text-yellow-400">🏠</span>
               Home
             </Link>
             <Link 
               href="/news" 
-              className="text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
+              className="text-sm sm:text-base text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
             >
               <span className="text-yellow-400">📰</span>
               News
             </Link>
             <Link 
               href="/ranking" 
-              className="text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
+              className="text-sm sm:text-base text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
             >
               <span className="text-yellow-400">🏆</span>
               Ranking
             </Link>
             <Link 
               href="/download" 
-              className="text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
+              className="text-sm sm:text-base text-white hover:text-yellow-400 transition-colors flex items-center gap-2"
             >
               <span className="text-yellow-400">💾</span>
               Download
