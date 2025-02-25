@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getVocationName, getVocationAssets } from '@/utils/game'
+import { Metadata } from 'next'
 
 // Função para buscar personagens
 async function searchCharacters(query: string) {
@@ -24,12 +25,20 @@ async function searchCharacters(query: string) {
   })
 }
 
+export const metadata: Metadata = {
+  title: 'Character Search',
+  description: 'Search for characters in MysticAAC'
+}
+
+type SearchPageProps = {
+  searchParams: Promise<{ q?: string }>
+}
+
 export default async function CharacterSearch({
   searchParams,
-}: {
-  searchParams: { q: string }
-}) {
-  const query = searchParams.q
+}: SearchPageProps) {
+  const params = await searchParams
+  const query = params?.q || ''
   const characters = query ? await searchCharacters(query) : []
 
   return (
