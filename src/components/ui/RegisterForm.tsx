@@ -19,7 +19,7 @@ export default function RegisterForm() {
     }
 
     if (data.password !== data.confirmPassword) {
-      setMessage('As senhas não coincidem')
+      setMessage('Passwords do not match')
       setIsLoading(false)
       return
     }
@@ -27,9 +27,9 @@ export default function RegisterForm() {
     const result = await createAccount(data)
     
     if (!result.success) {
-      setMessage(result.error || 'Erro ao criar conta')
+      setMessage(result.error || 'Error creating account')
     } else {
-      setMessage('Conta criada com sucesso!')
+      setMessage('Account created successfully!')
     }
 
     setIsLoading(false)

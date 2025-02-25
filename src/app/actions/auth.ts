@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
-import * as argon2 from 'argon2'
+import crypto from 'crypto'
 
 interface CreateAccountData {
   name: string
@@ -14,9 +14,14 @@ interface LoginData {
   password: string
 }
 
+// Função para criar hash SHA1
+function sha1(password: string): string {
+  return crypto.createHash('sha1').update(password).digest('hex')
+}
+
 export async function createAccount(data: CreateAccountData) {
   try {
-    const hashedPassword = await argon2.hash(data.password)
+    const hashedPassword = sha1(data.password)
     
     const account = await prisma.accounts.create({
       data: {
@@ -31,8 +36,8 @@ export async function createAccount(data: CreateAccountData) {
 
     return { success: true, account }
   } catch (error) {
-    console.error('Erro ao criar conta:', error)
-    return { success: false, error: 'Falha ao criar conta' }
+    console.error('Error creating account:', error)
+    return { success: false, error: 'Failed to create account' }
   }
 }
 
@@ -48,13 +53,14 @@ export async function loginUser(data: LoginData) {
     })
 
     if (!account) {
-      return { success: false, error: 'Conta não encontrada' }
+      return { success: false, error: 'Account not found' }
     }
 
-    const isValid = await argon2.verify(account.password, data.password)
+    const hashedPassword = sha1(data.password)
+    const isValid = hashedPassword === account.password
     
     if (!isValid) {
-      return { success: false, error: 'Senha incorreta' }
+      return { success: false, error: 'Incorrect password' }
     }
 
     return { 
@@ -69,7 +75,7 @@ export async function loginUser(data: LoginData) {
       }
     }
   } catch (error) {
-    console.error('Erro ao fazer login:', error)
-    return { success: false, error: 'Erro interno ao tentar fazer login' }
+    console.error('Error when logging in:', error)
+    return { success: false, error: 'Internal error when trying to log in' }
   }
 }
