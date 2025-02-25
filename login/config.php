@@ -35,13 +35,22 @@ function getLuaConfig($configPath = 'CAMINHO_PRO_SEU_CONFIG.LUA') {
     
     // Parse basic Lua configurations
     preg_match('/serverName\s*=\s*"([^"]+)"/', $content, $matches);
-    $config['serverName'] = $matches[1] ?? 'Seu Mundo';
+    if (!isset($matches[1])) {
+        throw new Exception('Unable to read serverName from config.lua');
+    }
+    $config['serverName'] = $matches[1];
     
     preg_match('/ip\s*=\s*"([^"]+)"/', $content, $matches);
-    $config['ip'] = $matches[1] ?? '127.0.0.1';
+    if (!isset($matches[1])) {
+        throw new Exception('Unable to read IP from config.lua');
+    }
+    $config['ip'] = $matches[1];
     
     preg_match('/gameProtocolPort\s*=\s*(\d+)/', $content, $matches);
-    $config['gameProtocolPort'] = intval($matches[1] ?? 7172);
+    if (!isset($matches[1])) {
+        throw new Exception('Unable to read gameProtocolPort from config.lua');
+    }
+    $config['gameProtocolPort'] = intval($matches[1]);
     
     preg_match('/worldType\s*=\s*"([^"]+)"/', $content, $matches);
     $config['worldType'] = $matches[1] ?? 'pvp';

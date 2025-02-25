@@ -14,7 +14,7 @@ interface LoginData {
   password: string
 }
 
-// Função para criar hash SHA1
+// Function to create SHA1 hash
 function sha1(password: string): string {
   return crypto.createHash('sha1').update(password).digest('hex')
 }
