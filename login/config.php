@@ -24,7 +24,7 @@ function getDB() {
     return $db;
 }
 
-function getLuaConfig($configPath = 'CAMINHO_PRO_SEU_CONFIG.LUA') {
+function getLuaConfig($configPath = 'path to config.lua') {
     if (!file_exists($configPath)) {
         error_log("Config file not found: " . $configPath);
         return false;

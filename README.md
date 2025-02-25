@@ -15,7 +15,7 @@ To get started with the project, follow these steps:
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd tibia-website
+   cd MysticAAC
    ```
 
 2. **Install dependencies:**
@@ -23,15 +23,39 @@ To get started with the project, follow these steps:
    pnpm install
    ```
 
-3. **Run the development server:**
+3. **Set up Prisma:**
+   ```bash
+   # Initialize Prisma
+   pnpm prisma init
+
+   # Generate Prisma Client from your schema
+   pnpm prisma generate
+
+   # Push the schema to your database (this will create/update tables)
+   pnpm prisma db push
+   ```
+
+4. **Configure environment variables:**
+   Create or edit `.env` file in the root directory:
+   ```env
+   DATABASE_URL="mysql://root:PASSWORD@localhost:3306/DATABASE_NAME"
+   ```
+
+5. **Run the development server:**
    ```bash
    pnpm run dev
    ```
 
-4. **Open your browser and navigate to:**
+6. **Open your browser and navigate to:**
    ```
    http://localhost:3000
    ```
+
+## Important Notes
+
+- Make sure your MySQL server is running before running Prisma commands
+- The `prisma db push` command will create all tables defined in `prisma/schema.prisma`
+- Use `prisma studio` to verify your database structure and content
 
 ## Project Structure
 
