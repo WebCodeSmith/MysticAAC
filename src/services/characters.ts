@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 export async function getCharacterWithDetails(characterName: string) {
   return await prisma.players.findUnique({
     where: { 
-      name: characterName 
+      name: characterName,
+      deletion: 0 // Add this condition
     },
     select: {
       id: true,

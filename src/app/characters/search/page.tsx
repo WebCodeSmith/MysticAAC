@@ -13,7 +13,8 @@ async function searchCharacters(query: string) {
     where: {
       name: {
         contains: query
-      }
+      },
+      deletion: 0 // Add this condition to filter out deleted characters
     },
     take: 10,
     select: {

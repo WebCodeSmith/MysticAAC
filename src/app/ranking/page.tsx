@@ -14,6 +14,10 @@ interface RankingPlayer {
 
 export default async function RankingPage() {
   const players = await prisma.players.findMany({
+    where: {
+      deletion: 0, // Add this to filter out deleted characters
+      group_id: 1  // Optional: only show normal players, not staff
+    },
     take: 100,
     orderBy: { level: 'desc' },
     select: {

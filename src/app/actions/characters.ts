@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
+import crypto from 'crypto'
 
 interface CreateCharacterData {
   name: string
@@ -97,36 +98,43 @@ export async function createCharacter(data: CreateCharacterData) {
   }
 }
 
-export async function deleteCharacter(characterId: number) {
-  try {
-    const session = await getServerSession()
-    
-    if (!session?.user?.email) {
-      return { success: false, error: 'Não autorizado' }
-    }
+function sha1(password: string): string {
+  return crypto.createHash('sha1').update(password).digest('hex')
+}
 
-    // Verifica se o personagem pertence à conta do usuário
-    const character = await prisma.players.findFirst({
-      where: { 
-        id: characterId,
+export async function deleteCharacter(characterId: number, password: string) {
+  try {
+    const character = await prisma.players.findUnique({
+      where: { id: characterId },
+      select: {
+        name: true,
+        account_id: true,
         accounts: {
-          email: session.user.email
+          select: {
+            password: true
+          }
         }
       }
     })
 
     if (!character) {
-      return { success: false, error: 'Personagem não encontrado' }
+      return { success: false, error: 'Character not found' }
     }
 
-    // Deleta o personagem
-    await prisma.players.delete({
-      where: { id: characterId }
+    const hashedPassword = sha1(password)
+    const isValidPassword = hashedPassword === character.accounts.password
+    
+    if (!isValidPassword) {
+      return { success: false, error: 'Incorrect password' }
+    }
+
+    await prisma.players.update({
+      where: { id: characterId },
+      data: { deletion: 1 }
     })
 
     return { success: true }
   } catch (error) {
-    console.error('Erro ao deletar personagem:', error)
-    return { success: false, error: 'Erro ao deletar personagem' }
+    return { success: false, error: 'Error deleting character' }
   }
 }

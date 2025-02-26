@@ -44,6 +44,9 @@ export default async function DashboardPage() {
     },
     include: {
       players: {
+        where: {
+          deletion: 0 // Add this condition to filter out deleted characters
+        },
         orderBy: {
           level: 'desc'
         },
