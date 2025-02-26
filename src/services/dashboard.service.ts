@@ -10,6 +10,7 @@ export interface Character {
   healthmax: number
   mana: number
   manamax: number
+  deletion: number
 }
 
 export interface Account {
@@ -40,7 +41,8 @@ export async function getAccountWithCharacters(email: string) {
           health: true,
           healthmax: true,
           mana: true,
-          manamax: true
+          manamax: true,
+          deletion: true
         }
       }
     }
