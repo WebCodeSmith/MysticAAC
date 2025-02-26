@@ -4,31 +4,10 @@ import { redirect } from 'next/navigation'
 import LogoutButton from '@/components/ui/LogoutButton'
 import Link from 'next/link'
 import Image from 'next/image'
-import { prisma } from '@/lib/prisma'
+import { getAccountWithCharacters } from '@/services/dashboard.service'
+import type { Account, Character } from '@/services/dashboard.service'
 import DeleteCharacterButton from '@/components/ui/DeleteCharacterButton'
 import { getVocationName, getVocationAssets } from '@/utils/game'
-
-// Define types for our data
-interface Character {
-  id: number
-  name: string
-  level: number
-  vocation: number
-  sex: number
-  health: number
-  healthmax: number
-  mana: number
-  manamax: number
-}
-
-interface Account {
-  id: number
-  name: string
-  email: string
-  premdays: number
-  coins: number
-  players: Character[]
-}
 
 export default async function DashboardPage() {
   const session = await getServerSession()
@@ -37,33 +16,7 @@ export default async function DashboardPage() {
     redirect('/')
   }
 
-  // Get account and its characters
-  const account = await prisma.accounts.findFirst({
-    where: { 
-      email: session.user.email 
-    },
-    include: {
-      players: {
-        where: {
-          deletion: 0 // Add this condition to filter out deleted characters
-        },
-        orderBy: {
-          level: 'desc'
-        },
-        select: {
-          id: true,
-          name: true,
-          level: true,
-          vocation: true,
-          sex: true,
-          health: true,
-          healthmax: true,
-          mana: true,
-          manamax: true
-        }
-      }
-    }
-  }) as Account | null
+  const account = await getAccountWithCharacters(session.user.email)
 
   if (!account) {
     redirect('/')

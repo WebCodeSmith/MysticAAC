@@ -1,33 +1,12 @@
 import Header from '@/components/layout/Header'
-import { prisma } from '@/lib/prisma'
+import { getTopPlayers } from '@/services/ranking.service'
+import type { RankingPlayer } from '@/services/ranking.service'
 import { getVocationName, getVocationAssets } from '@/utils/game'
 import Image from 'next/image'
 import Link from 'next/link'
 
-interface RankingPlayer {
-  id: number
-  name: string
-  level: number
-  vocation: number
-  experience: bigint
-}
-
 export default async function RankingPage() {
-  const players = await prisma.players.findMany({
-    where: {
-      deletion: 0, // Add this to filter out deleted characters
-      group_id: 1  // Optional: only show normal players, not staff
-    },
-    take: 100,
-    orderBy: { level: 'desc' },
-    select: {
-      id: true,
-      name: true,
-      level: true,
-      vocation: true,
-      experience: true
-    }
-  }) as RankingPlayer[]
+  const players = await getTopPlayers(100)
 
   return (
     <main className="min-h-screen bg-tibia-darker bg-[url('/images/bg-pattern.png')] bg-repeat">
