@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { revalidatePath } from 'next/cache'
 import crypto from 'crypto'
+import { getGuildLeadershipInfo } from '@/services/guild.service'
 
 interface CreateCharacterData {
   name: string
@@ -106,7 +107,12 @@ function sha1(password: string): string {
   return crypto.createHash('sha1').update(password).digest('hex')
 }
 
-export async function deleteCharacter(characterId: number, password: string) {
+interface DeleteOptions {
+  guildAction?: 'delete' | 'transfer'
+  newLeaderId?: number
+}
+
+export async function deleteCharacter(characterId: number, password: string, options?: DeleteOptions) {
   try {
     const character = await prisma.players.findUnique({
       where: { id: characterId },
@@ -132,16 +138,51 @@ export async function deleteCharacter(characterId: number, password: string) {
       return { success: false, error: 'Incorrect password' }
     }
 
+    // Handle guild leadership
+    const guildInfo = await getGuildLeadershipInfo(characterId)
+    
+    if (guildInfo) {
+      if (!options?.guildAction) {
+        return { success: false, error: 'Guild leadership action required' }
+      }
+
+      if (options.guildAction === 'delete') {
+        // Delete guild and all memberships
+        await prisma.guild_membership.deleteMany({
+          where: { guild_id: guildInfo.guildId }
+        })
+        await prisma.guild_ranks.deleteMany({
+          where: { guild_id: guildInfo.guildId }
+        })
+        await prisma.guilds.delete({
+          where: { id: guildInfo.guildId }
+        })
+      } else if (options.guildAction === 'transfer') {
+        if (!options.newLeaderId) {
+          return { success: false, error: 'New leader must be selected' }
+        }
+
+        // Transfer guild leadership
+        await prisma.guilds.update({
+          where: { id: guildInfo.guildId },
+          data: { ownerid: options.newLeaderId }
+        })
+      }
+    }
+
+    // Delete character
     await prisma.players.update({
       where: { id: characterId },
       data: { deletion: 1 }
     })
 
-    // Revalidate affected pages
+    revalidatePath('/dashboard')
     revalidatePath('/ranking')
+    revalidatePath('/guilds')
 
     return { success: true }
   } catch (error) {
-    return { success: false, error: 'Error deleting character' }
+    console.error('Error deleting character:', error)
+    return { success: false, error: 'Failed to delete character' }
   }
 }
