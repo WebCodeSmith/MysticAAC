@@ -1,96 +1,12 @@
 import Header from '@/components/layout/Header'
-import { getServerSession } from "next-auth"
 import { redirect } from 'next/navigation'
 import LogoutButton from '@/components/ui/LogoutButton'
 import Link from 'next/link'
-import Image from 'next/image'
-import { getAccountWithCharacters } from '@/services/dashboard.service'
-import type { Account, Character } from '@/services/dashboard.service'
-import DeleteCharacterButton from '@/components/ui/DeleteCharacterButton'
-import { getVocationName, getVocationAssets } from '@/utils/game'
-
-function CharacterCard({ character }: { character: Character }) {
-  const { gif } = getVocationAssets(character.vocation)
-  
-  return (
-    <div className={`bg-tibia-dark p-4 rounded-lg border ${
-      character.deletion ? 'border-red-800 opacity-50' : 'border-tibia-accent'
-    }`}>
-      <div className="flex items-center gap-4">
-        <figure className="relative w-[64px] h-[64px] m-0">
-          <Image
-            src={gif}
-            alt={character.name}
-            width={64}
-            height={64}
-            className={`${character.deletion ? 'grayscale' : ''}`}
-            priority
-            layout="responsive"
-          />
-          {character.deletion && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
-              <span className="text-red-500 font-semibold text-sm">DELETED</span>
-            </div>
-          )}
-        </figure>
-
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className={`font-bold text-lg ${
-                character.deletion ? 'text-red-500' : 'text-yellow-400'
-              }`}>
-                {character.name}
-              </h3>
-              <p className="text-gray-400">
-                Level {character.level} - {getVocationName(character.vocation)}
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              {!character.deletion && (
-                <>
-                  <Link
-                    href={`/characters/${character.name}`}
-                    className="text-sm px-3 py-1 rounded transition-colors bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    View
-                  </Link>
-                  <DeleteCharacterButton
-                    characterId={character.id}
-                    characterName={character.name}
-                  />
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-            <div className="text-gray-400">
-              HP: <span className="text-red-400">{character.health}/{character.healthmax}</span>
-            </div>
-            <div className="text-gray-400">
-              MP: <span className="text-blue-400">{character.mana}/{character.manamax}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+import { getAuthenticatedAccount, Character } from '@/services/dashboard.service'
+import { CharacterCard } from '@/components/dashboard/CharacterCard'
 
 export default async function DashboardPage() {
-  const session = await getServerSession()
-
-  if (!session?.user?.email) {
-    redirect('/')
-  }
-
-  const account = await getAccountWithCharacters(session.user.email)
-
-  if (!account) {
-    redirect('/')
-  }
+  const account = await getAuthenticatedAccount()
 
   return (
     <main className="min-h-screen bg-tibia-darker">

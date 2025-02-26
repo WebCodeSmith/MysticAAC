@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from "next-auth"
+import { redirect } from 'next/navigation'
 
 export interface Character {
   id: number
@@ -47,4 +49,20 @@ export async function getAccountWithCharacters(email: string) {
       }
     }
   }) as Account | null
+}
+
+export async function getAuthenticatedAccount() {
+  const session = await getServerSession()
+
+  if (!session?.user?.email) {
+    redirect('/')
+  }
+
+  const account = await getAccountWithCharacters(session.user.email)
+
+  if (!account) {
+    redirect('/')
+  }
+
+  return account
 }
