@@ -4,7 +4,7 @@ export async function getCharacterWithDetails(characterName: string) {
   return await prisma.players.findUnique({
     where: { 
       name: characterName,
-      deletion: 0 // Add this condition
+      deletion: 0 
     },
     select: {
       id: true,

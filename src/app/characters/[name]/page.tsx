@@ -1,5 +1,5 @@
 import Header from '@/components/layout/Header'
-import { getCharacterWithDetails, getAccountCharacters } from '@/services/characters'
+import { getCharacterWithDetails, getAccountCharacters } from '@/services/character.service'
 import { getVocationName, getVocationAssets } from '@/utils/game'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'

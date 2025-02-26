@@ -42,7 +42,7 @@ export default function DeleteCharacterButton({ characterId, characterName }: De
         onClick={() => setIsModalOpen(true)}
         className="text-sm px-3 py-1 rounded transition-colors bg-red-600 hover:bg-red-700 text-white"
       >
-        Deletar
+        Delete
       </button>
 
       <DeleteCharacterModal
