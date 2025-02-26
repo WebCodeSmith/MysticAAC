@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
+import { revalidatePath } from 'next/cache'
 import crypto from 'crypto'
 
 interface CreateCharacterData {
@@ -91,6 +92,9 @@ export async function createCharacter(data: CreateCharacterData) {
       }
     })
 
+    // Revalidate affected pages
+    revalidatePath('/ranking')
+
     return { success: true, character }
   } catch (error) {
     console.error('Error creating character:', error)
@@ -132,6 +136,9 @@ export async function deleteCharacter(characterId: number, password: string) {
       where: { id: characterId },
       data: { deletion: 1 }
     })
+
+    // Revalidate affected pages
+    revalidatePath('/ranking')
 
     return { success: true }
   } catch (error) {

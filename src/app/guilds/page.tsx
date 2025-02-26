@@ -4,7 +4,12 @@ import Link from 'next/link'
 import CreateGuildButton from '@/components/guilds/CreateGuildButton'
 import { getServerSession } from 'next-auth'
 import { getEligibleGuildLeaders } from '@/app/actions/guilds'
-import { redirect } from 'next/navigation'
+
+interface EligibleLeader {
+  id: number
+  name: string
+  level: number
+}
 
 async function getGuilds() {
   return await prisma.guilds.findMany({
@@ -24,25 +29,20 @@ async function getGuilds() {
 
 export default async function GuildsPage() {
   const session = await getServerSession()
-  
-  if (!session?.user?.email) {
-    redirect('/')
-  }
-
-  // Get account id first
-  const account = await prisma.accounts.findFirst({
-    where: { email: session.user.email },
-    select: { id: true }
-  })
-
-  if (!account) {
-    redirect('/')
-  }
-
-  // Get eligible leaders using the service function
-  const eligibleLeaders = await getEligibleGuildLeaders(account.id)
-
   const guilds = await getGuilds()
+  
+  // Only fetch eligible leaders if user is logged in
+  let eligibleLeaders: EligibleLeader[] = []
+  if (session?.user?.email) {
+    const account = await prisma.accounts.findFirst({
+      where: { email: session.user.email },
+      select: { id: true }
+    })
+    
+    if (account) {
+      eligibleLeaders = await getEligibleGuildLeaders(account.id)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-tibia-darker">

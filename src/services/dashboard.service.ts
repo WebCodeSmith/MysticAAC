@@ -28,9 +28,6 @@ export async function getAccountWithCharacters(email: string) {
     },
     include: {
       players: {
-        where: {
-          deletion: 0
-        },
         orderBy: {
           level: 'desc'
         },
